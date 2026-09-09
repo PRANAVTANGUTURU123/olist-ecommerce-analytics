@@ -33,7 +33,7 @@ Build these in Model view (all Many-to-One, single direction unless noted):
 | `fact_order_items[order_id]` | `dim_orders[order_id]` | Many-to-1 |
 | `fact_order_items[product_id]` | `dim_products[product_id]` | Many-to-1 |
 | `fact_order_items[seller_id]` | `dim_sellers[seller_id]` | Many-to-1 |
-| `dim_orders[customer_id]` | `dim_customers[customer_id]` | Many-to-1 |
+| `dim_orders[customer_id]` | `dim_customers[customer_id]` | One-to-one (`customer_id` is order-scoped and unique in both tables — see note below) |
 | `fact_payments[order_id]` | `dim_orders[order_id]` | Many-to-1 |
 | `fact_reviews[order_id]` | `dim_orders[order_id]` | Many-to-1 |
 | `dim_orders[purchase_date]` | `dim_date[date]` | Many-to-1 |
@@ -50,6 +50,12 @@ This gives a clean star: `fact_order_items` and `fact_payments`/`fact_reviews`
 all filter through `dim_orders`, which is the natural place to slice by
 status, dates, and delivery performance.
 
+**Note on `dim_orders` ↔ `dim_customers`:** `customer_id` in the raw data is
+scoped per *order*, not per *person* (`customer_unique_id` is the real
+person key). Because of that, `customer_id` is unique in both `dim_orders`
+and `dim_customers`, making this one of the few genuinely 1:1 relationships
+in the model rather than the usual many-to-one fact→dimension pattern.
+
 ## 2. DAX measures
 
 Create a dedicated measures table (New Table → `_Measures`, or a blank query)
@@ -60,19 +66,19 @@ to keep them out of the physical tables.
 Revenue =
 CALCULATE(
     SUMX(fact_order_items, fact_order_items[price] + fact_order_items[freight_value]),
-    dim_orders[order_status] NOT IN {"canceled", "unavailable"}
+    NOT(dim_orders[order_status] IN {"canceled", "unavailable"})
 )
 
 Product Revenue =
 CALCULATE(
     SUM(fact_order_items[price]),
-    dim_orders[order_status] NOT IN {"canceled", "unavailable"}
+    NOT(dim_orders[order_status] IN {"canceled", "unavailable"})
 )
 
 Orders =
 CALCULATE(
     DISTINCTCOUNT(fact_order_items[order_id]),
-    dim_orders[order_status] NOT IN {"canceled", "unavailable"}
+    NOT(dim_orders[order_status] IN {"canceled", "unavailable"})
 )
 
 Revenue per Order = DIVIDE([Revenue], [Orders])

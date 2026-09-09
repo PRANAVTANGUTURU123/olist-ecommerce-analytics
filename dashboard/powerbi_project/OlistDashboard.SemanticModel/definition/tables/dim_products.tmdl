@@ -1,0 +1,78 @@
+table dim_products
+	lineageTag: 4db88295-147f-418b-b2d4-8ff1dbb24f36
+
+	column product_id
+		dataType: string
+		lineageTag: 4ac4886c-0888-4afa-9898-153dfed6e032
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_pt
+		dataType: string
+		lineageTag: 8de97fcc-af35-49f9-9cb1-e4d484982a9e
+		summarizeBy: none
+		sourceColumn: category_pt
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_en
+		dataType: string
+		lineageTag: 90524699-dfdb-48b2-8f49-7ff74f62bdf4
+		summarizeBy: none
+		sourceColumn: category_en
+
+		annotation SummarizationSetBy = Automatic
+
+	column weight_g
+		dataType: double
+		lineageTag: 91307cc7-f659-48d6-88a8-29f6c30940ef
+		summarizeBy: sum
+		sourceColumn: weight_g
+
+		annotation SummarizationSetBy = Automatic
+
+	column length_cm
+		dataType: double
+		lineageTag: 075c2e5b-844c-4528-ad19-d1b1b03ccfc0
+		summarizeBy: sum
+		sourceColumn: length_cm
+
+		annotation SummarizationSetBy = Automatic
+
+	column height_cm
+		dataType: double
+		lineageTag: 8f1eb53f-ec94-407a-b3fa-4bcb5f11590f
+		summarizeBy: sum
+		sourceColumn: height_cm
+
+		annotation SummarizationSetBy = Automatic
+
+	column width_cm
+		dataType: double
+		lineageTag: 757f2430-b009-476b-ace8-fcbb47d0b6c5
+		summarizeBy: sum
+		sourceColumn: width_cm
+
+		annotation SummarizationSetBy = Automatic
+
+	column product_volume_cm3
+		dataType: double
+		lineageTag: 10b6a745-f179-4da0-9890-6f29ec250169
+		summarizeBy: sum
+		sourceColumn: product_volume_cm3
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_products = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("E:\Studies\projects\analyst_project\data\processed\dim_products.csv"),[Delimiter=",", Columns=8, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"product_id", type text}, {"category_pt", type text}, {"category_en", type text}, {"weight_g", type number}, {"length_cm", type number}, {"height_cm", type number}, {"width_cm", type number}, {"product_volume_cm3", type number}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table

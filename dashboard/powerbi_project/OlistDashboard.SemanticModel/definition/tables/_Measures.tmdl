@@ -1,0 +1,121 @@
+table _Measures
+	lineageTag: 070fd66a-3bf9-4758-b7f5-834fcb14c8ad
+
+	measure Revenue = ```
+		CALCULATE(
+		    SUMX(fact_order_items, fact_order_items[price] + fact_order_items[freight_value]),
+		    NOT(dim_orders[order_status] IN {"canceled", "unavailable"})
+		)
+		```
+		formatString: "\$#,0"
+		lineageTag: 0636f803-8987-4195-b496-d9aef44ffbae
+
+	measure 'Product Revenue' = ```
+		CALCULATE(
+		    SUM(fact_order_items[price]),
+		    NOT(dim_orders[order_status] IN {"canceled", "unavailable"})
+		)
+		```
+		formatString: "\$#,0"
+		lineageTag: 8aad420b-5591-4016-8988-0a90b0f5be7b
+
+	measure Orders = ```
+		CALCULATE(
+		    DISTINCTCOUNT(fact_order_items[order_id]),
+		    NOT(dim_orders[order_status] IN {"canceled", "unavailable"})
+		)
+		```
+		formatString: 0
+		lineageTag: c6341c3c-00ea-49a6-97c4-a6f75770e8aa
+
+	measure 'Revenue per Order' = ```
+		DIVIDE([Revenue], [Orders])
+		```
+		formatString: "\$#,0.00"
+		lineageTag: 8e796181-76aa-44d0-a90c-aea38ff909a0
+
+	measure 'Avg Review Score' = ```
+		AVERAGE(fact_reviews[review_score])
+		```
+		formatString: 0.00
+		lineageTag: 540369f7-dd68-4ec4-b340-19b963860134
+
+	measure 'Delivered Orders' = ```
+		CALCULATE(COUNTROWS(dim_orders), NOT ISBLANK(dim_orders[delivered_customer_ts]))
+		```
+		formatString: 0
+		lineageTag: eae68fbf-aa19-4aeb-b91d-99f922b42c92
+
+	measure 'Avg Delivery Days' = ```
+		CALCULATE(AVERAGE(dim_orders[delivery_days_actual]), NOT ISBLANK(dim_orders[delivered_customer_ts]))
+		```
+		formatString: 0.0
+		lineageTag: b715354c-8f6b-4359-aabe-4f604b15c508
+
+	measure 'Late Orders' = ```
+		CALCULATE(COUNTROWS(dim_orders), dim_orders[is_late] = TRUE)
+		```
+		formatString: 0
+		lineageTag: cafd8b33-6594-463b-9bd4-d22ad9b077d3
+
+	measure 'Pct Late Orders' = ```
+		DIVIDE([Late Orders], [Delivered Orders])
+		```
+		formatString: 0.0%
+		lineageTag: 025e41d2-b378-4890-bda1-fd355125ad89
+
+	measure 'Total Payment Value' = ```
+		SUM(fact_payments[payment_value])
+		```
+		formatString: "\$#,0"
+		lineageTag: 421e0fe1-26f7-4ae2-aec0-18cabe8fa8ff
+
+	measure 'Avg Installments' = ```
+		CALCULATE(AVERAGE(fact_payments[installments]), fact_payments[payment_type] = "credit_card")
+		```
+		formatString: 0.0
+		lineageTag: 918240f2-c2b6-40e4-8fd0-638a61080195
+
+	measure 'Repeat Customers' = ```
+		CALCULATE(
+		    DISTINCTCOUNT(dim_customers[customer_unique_id]),
+		    FILTER(
+		        VALUES(dim_customers[customer_unique_id]),
+		        CALCULATE(DISTINCTCOUNT(dim_orders[order_id])) > 1
+		    )
+		)
+		```
+		formatString: 0
+		lineageTag: bae1c165-2304-492f-981a-00743c80d264
+
+	measure 'Total Customers' = ```
+		DISTINCTCOUNT(dim_customers[customer_unique_id])
+		```
+		formatString: 0
+		lineageTag: 6b5998ff-3695-4132-8534-aec48d0600c6
+
+	measure 'Pct Repeat Customers' = ```
+		DIVIDE([Repeat Customers], [Total Customers])
+		```
+		formatString: 0.0%
+		lineageTag: d74d3428-3867-4673-ae46-3f420b3748a3
+
+	measure 'Revenue LY' = ```
+		CALCULATE([Revenue], SAMEPERIODLASTYEAR(dim_date[date]))
+		```
+		formatString: "\$#,0"
+		lineageTag: 319b783d-7f3e-429e-964d-fb50d88bb600
+
+	measure 'Revenue MoM %' = ```
+		VAR CurrM = [Revenue]
+		VAR PrevM = CALCULATE([Revenue], DATEADD(dim_date[date], -1, MONTH))
+		RETURN DIVIDE(CurrM - PrevM, PrevM)
+		```
+		formatString: 0.0%
+		lineageTag: 9374a111-bfbf-4fd8-a939-10817a72909c
+
+	partition _Measures = calculated
+		mode: import
+		source = {(1)}
+
+	annotation PBI_ResultType = Table

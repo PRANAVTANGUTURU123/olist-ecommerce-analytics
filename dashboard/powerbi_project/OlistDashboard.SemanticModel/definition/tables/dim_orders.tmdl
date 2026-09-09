@@ -1,0 +1,118 @@
+table dim_orders
+	lineageTag: 1e2654a7-ecfc-4893-8524-3e908fccad88
+
+	column order_id
+		dataType: string
+		lineageTag: 0b2d2ffa-34a5-4255-aec9-8fc46242edcb
+		summarizeBy: none
+		sourceColumn: order_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_id
+		dataType: string
+		lineageTag: f1f1a11a-7245-48de-b107-7377d78ccc6d
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column order_status
+		dataType: string
+		lineageTag: ef9e6ea2-815b-49d1-b895-9f27dbed1e84
+		summarizeBy: none
+		sourceColumn: order_status
+
+		annotation SummarizationSetBy = Automatic
+
+	column purchase_ts
+		dataType: dateTime
+		lineageTag: 986fd8b5-13ca-4711-92a7-f624454ea87b
+		summarizeBy: none
+		sourceColumn: purchase_ts
+
+		annotation SummarizationSetBy = Automatic
+
+	column approved_ts
+		dataType: dateTime
+		lineageTag: 6d78d7a5-9d26-4bf4-9547-ab56477b7f5f
+		summarizeBy: none
+		sourceColumn: approved_ts
+
+		annotation SummarizationSetBy = Automatic
+
+	column delivered_carrier_ts
+		dataType: dateTime
+		lineageTag: 465543a6-6245-40c1-b761-334b2b21397f
+		summarizeBy: none
+		sourceColumn: delivered_carrier_ts
+
+		annotation SummarizationSetBy = Automatic
+
+	column delivered_customer_ts
+		dataType: dateTime
+		lineageTag: ad7c496d-1d67-48a2-a986-20e4693d2912
+		summarizeBy: none
+		sourceColumn: delivered_customer_ts
+
+		annotation SummarizationSetBy = Automatic
+
+	column estimated_delivery_ts
+		dataType: dateTime
+		lineageTag: 7aafee0e-27e5-4f38-b62e-0a61d53d4524
+		summarizeBy: none
+		sourceColumn: estimated_delivery_ts
+
+		annotation SummarizationSetBy = Automatic
+
+	column purchase_date
+		dataType: dateTime
+		lineageTag: 6ad2c463-8979-42c2-97a9-6778582e3021
+		summarizeBy: none
+		sourceColumn: purchase_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column delivery_days_actual
+		dataType: double
+		lineageTag: fc44264d-7366-415c-8f08-c41e5b3fe8e6
+		summarizeBy: sum
+		sourceColumn: delivery_days_actual
+
+		annotation SummarizationSetBy = Automatic
+
+	column delivery_days_estimated
+		dataType: double
+		lineageTag: 317e6972-c8fb-4e40-a66c-004ec171da1d
+		summarizeBy: sum
+		sourceColumn: delivery_days_estimated
+
+		annotation SummarizationSetBy = Automatic
+
+	column delivery_delta_days
+		dataType: double
+		lineageTag: c1a53e74-7a58-4ed4-862f-a148ac876d55
+		summarizeBy: sum
+		sourceColumn: delivery_delta_days
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_late
+		dataType: boolean
+		lineageTag: 96b24062-4343-4609-97c7-8d228e5c1d2f
+		summarizeBy: none
+		sourceColumn: is_late
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_orders = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("E:\Studies\projects\analyst_project\data\processed\dim_orders.csv"),[Delimiter=",", Columns=13, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"order_id", type text}, {"customer_id", type text}, {"order_status", type text}, {"purchase_ts", type datetime}, {"approved_ts", type datetime}, {"delivered_carrier_ts", type datetime}, {"delivered_customer_ts", type datetime}, {"estimated_delivery_ts", type datetime}, {"purchase_date", type datetime}, {"delivery_days_actual", type number}, {"delivery_days_estimated", type number}, {"delivery_delta_days", type number}, {"is_late", type logical}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table

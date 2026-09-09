@@ -1,0 +1,38 @@
+relationship r_26e265737fb648ce
+	fromColumn: fact_order_items.order_id
+	toColumn: dim_orders.order_id
+
+relationship r_0feb0cea25364226
+	fromColumn: fact_order_items.product_id
+	toColumn: dim_products.product_id
+
+relationship r_1b90ba0480784e94
+	fromColumn: fact_order_items.seller_id
+	toColumn: dim_sellers.seller_id
+
+relationship r_4c3e0bf74dd74e69
+	fromCardinality: one
+	toCardinality: one
+	fromColumn: dim_orders.customer_id
+	toColumn: dim_customers.customer_id
+
+relationship r_2acf6af9526145ae
+	fromColumn: fact_payments.order_id
+	toColumn: dim_orders.order_id
+
+relationship r_6c55609e5d7e4793
+	fromColumn: fact_reviews.order_id
+	toColumn: dim_orders.order_id
+
+relationship r_c746674d07b84db5
+	fromColumn: dim_orders.purchase_date
+	toColumn: dim_date.date
+
+relationship r_163e6c4da3fb4edb
+	fromColumn: dim_customers.zip_code_prefix
+	toColumn: dim_geolocation.zip_code_prefix
+
+relationship r_31d6aaf5e54c48da
+	isActive: false
+	fromColumn: dim_sellers.zip_code_prefix
+	toColumn: dim_geolocation.zip_code_prefix

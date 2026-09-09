@@ -1,0 +1,70 @@
+table fact_order_items
+	lineageTag: 543963e4-2c01-4bc2-9664-e631716d7596
+
+	column order_id
+		dataType: string
+		lineageTag: 02999f68-88ce-4d81-80c7-6f2aec332d37
+		summarizeBy: none
+		sourceColumn: order_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column order_item_seq
+		dataType: int64
+		lineageTag: b98694c2-cbf8-4125-808f-bd55a7e8eeec
+		summarizeBy: none
+		sourceColumn: order_item_seq
+
+		annotation SummarizationSetBy = Automatic
+
+	column product_id
+		dataType: string
+		lineageTag: 4bb5cd9c-8440-4230-b50b-04a7be528fae
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column seller_id
+		dataType: string
+		lineageTag: 31d3d4c2-2c9d-4bcf-a127-9fd81a6aa4e6
+		summarizeBy: none
+		sourceColumn: seller_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column shipping_limit_date
+		dataType: dateTime
+		lineageTag: 0a42174f-2c58-4fd7-9c9d-a097ac655d4a
+		summarizeBy: none
+		sourceColumn: shipping_limit_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column price
+		dataType: double
+		lineageTag: f4be8887-01a9-4590-af0d-d1c4db565d42
+		summarizeBy: sum
+		sourceColumn: price
+
+		annotation SummarizationSetBy = Automatic
+
+	column freight_value
+		dataType: double
+		lineageTag: 0ebb7903-58e1-4f47-9621-b916d195a614
+		summarizeBy: sum
+		sourceColumn: freight_value
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_order_items = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("E:\Studies\projects\analyst_project\data\processed\fact_order_items.csv"),[Delimiter=",", Columns=7, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"order_id", type text}, {"order_item_seq", Int64.Type}, {"product_id", type text}, {"seller_id", type text}, {"shipping_limit_date", type datetime}, {"price", type number}, {"freight_value", type number}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table

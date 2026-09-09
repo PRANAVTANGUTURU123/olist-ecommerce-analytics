@@ -1,0 +1,62 @@
+table fact_reviews
+	lineageTag: e390d3cd-0a93-4560-85ed-53f5f921ba8f
+
+	column review_id
+		dataType: string
+		lineageTag: 5e7bb869-badf-47ef-a369-0bb7b284038f
+		summarizeBy: none
+		sourceColumn: review_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column order_id
+		dataType: string
+		lineageTag: 85739156-3aa8-4288-a793-bcc955fa4698
+		summarizeBy: none
+		sourceColumn: order_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column review_score
+		dataType: int64
+		lineageTag: 2f82846c-5d01-4eb1-9c32-a19f43ddad2b
+		summarizeBy: sum
+		sourceColumn: review_score
+
+		annotation SummarizationSetBy = Automatic
+
+	column has_comment
+		dataType: boolean
+		lineageTag: 9d171cf9-9f78-4d48-b004-29eed0a0df83
+		summarizeBy: none
+		sourceColumn: has_comment
+
+		annotation SummarizationSetBy = Automatic
+
+	column review_creation_date
+		dataType: dateTime
+		lineageTag: 9ab5df67-5f53-468e-9962-18ed81546678
+		summarizeBy: none
+		sourceColumn: review_creation_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column review_answer_timestamp
+		dataType: dateTime
+		lineageTag: e0faefcc-9284-417d-b9ba-f965a4a6eb88
+		summarizeBy: none
+		sourceColumn: review_answer_timestamp
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_reviews = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("E:\Studies\projects\analyst_project\data\processed\fact_reviews.csv"),[Delimiter=",", Columns=6, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"review_id", type text}, {"order_id", type text}, {"review_score", Int64.Type}, {"has_comment", type logical}, {"review_creation_date", type datetime}, {"review_answer_timestamp", type datetime}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table

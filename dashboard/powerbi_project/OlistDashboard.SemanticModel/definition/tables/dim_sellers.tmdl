@@ -1,0 +1,46 @@
+table dim_sellers
+	lineageTag: ea928c51-7c45-48d2-a8fc-3d5cc7148cd5
+
+	column seller_id
+		dataType: string
+		lineageTag: 4cd16509-7c7e-4e90-8e04-1972bdf424f9
+		summarizeBy: none
+		sourceColumn: seller_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column zip_code_prefix
+		dataType: int64
+		lineageTag: d2fd9e12-c806-44cf-9095-a9a2b147af56
+		summarizeBy: none
+		sourceColumn: zip_code_prefix
+
+		annotation SummarizationSetBy = Automatic
+
+	column city
+		dataType: string
+		lineageTag: 9efa8733-8aa4-4ef4-a259-265fd1b6bc9b
+		summarizeBy: none
+		sourceColumn: city
+
+		annotation SummarizationSetBy = Automatic
+
+	column state
+		dataType: string
+		lineageTag: e5645a8b-2def-4a80-8634-6e2ce6ccb3b1
+		summarizeBy: none
+		sourceColumn: state
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_sellers = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("E:\Studies\projects\analyst_project\data\processed\dim_sellers.csv"),[Delimiter=",", Columns=4, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"seller_id", type text}, {"zip_code_prefix", Int64.Type}, {"city", type text}, {"state", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table

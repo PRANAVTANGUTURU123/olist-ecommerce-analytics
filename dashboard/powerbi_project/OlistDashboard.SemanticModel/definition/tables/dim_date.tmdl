@@ -1,0 +1,78 @@
+table dim_date
+	lineageTag: e8ed2445-e59b-4c19-9c37-b2eed804b346
+
+	column date
+		dataType: dateTime
+		lineageTag: 6005e272-75fd-4ac4-ac83-3d7a8fa94e8f
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation SummarizationSetBy = Automatic
+
+	column year
+		dataType: int64
+		lineageTag: 24f3f8f0-efce-4723-8c1e-994ee483917d
+		summarizeBy: sum
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column month
+		dataType: int64
+		lineageTag: cc9385fc-72fc-4da2-971b-10e4fcabc735
+		summarizeBy: sum
+		sourceColumn: month
+
+		annotation SummarizationSetBy = Automatic
+
+	column month_name
+		dataType: string
+		lineageTag: 83ca852e-9c3c-4e7e-8fe4-9d20951ac3aa
+		summarizeBy: none
+		sourceColumn: month_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column year_month
+		dataType: string
+		lineageTag: c52b4ab2-6382-4ffc-9f15-b6d1569f7cde
+		summarizeBy: none
+		sourceColumn: year_month
+
+		annotation SummarizationSetBy = Automatic
+
+	column quarter
+		dataType: int64
+		lineageTag: 16daf454-9991-40c2-803e-f254719b41cd
+		summarizeBy: sum
+		sourceColumn: quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	column day_name
+		dataType: string
+		lineageTag: 2290240b-4183-413c-8884-a6279e49f782
+		summarizeBy: none
+		sourceColumn: day_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_weekend
+		dataType: boolean
+		lineageTag: 288adc78-ddc0-4cb1-be68-137ff15d99a1
+		summarizeBy: none
+		sourceColumn: is_weekend
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_date = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("E:\Studies\projects\analyst_project\data\processed\dim_date.csv"),[Delimiter=",", Columns=8, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"date", type datetime}, {"year", Int64.Type}, {"month", Int64.Type}, {"month_name", type text}, {"year_month", type text}, {"quarter", Int64.Type}, {"day_name", type text}, {"is_weekend", type logical}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table

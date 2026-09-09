@@ -1,0 +1,54 @@
+table dim_geolocation
+	lineageTag: 6bf0b159-adbf-4375-837f-85f0cee1206b
+
+	column zip_code_prefix
+		dataType: int64
+		lineageTag: cab49ca2-b734-41ab-a1a4-16098da68c94
+		summarizeBy: none
+		sourceColumn: zip_code_prefix
+
+		annotation SummarizationSetBy = Automatic
+
+	column lat
+		dataType: double
+		lineageTag: 950ef4f1-da5f-46f1-9891-ccd0d5177686
+		summarizeBy: sum
+		sourceColumn: lat
+
+		annotation SummarizationSetBy = Automatic
+
+	column lng
+		dataType: double
+		lineageTag: 5173520b-b62c-419b-9245-1c72607f636f
+		summarizeBy: sum
+		sourceColumn: lng
+
+		annotation SummarizationSetBy = Automatic
+
+	column city
+		dataType: string
+		lineageTag: 477cb2d2-9913-4bb4-9d5c-774f07a68a89
+		summarizeBy: none
+		sourceColumn: city
+
+		annotation SummarizationSetBy = Automatic
+
+	column state
+		dataType: string
+		lineageTag: 96a53c1d-803d-43e6-a604-221cae60da35
+		summarizeBy: none
+		sourceColumn: state
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_geolocation = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("E:\Studies\projects\analyst_project\data\processed\dim_geolocation.csv"),[Delimiter=",", Columns=5, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"zip_code_prefix", Int64.Type}, {"lat", type number}, {"lng", type number}, {"city", type text}, {"state", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table

@@ -3,7 +3,11 @@
 A full data-analyst portfolio project on the [Olist Brazilian E-Commerce
 dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) (~99k
 orders, 2016–2018): Python data cleaning + EDA, a SQL analysis layer over a
-star schema, a Power BI build spec, and a written business-insights report.
+star schema, two dashboard builds (a live interactive web dashboard, and a
+Power BI project), and a written business-insights report.
+
+**Live dashboard:** [olist analytics dashboard](https://claude.ai/code/artifact/c8811fc0-c89f-4851-a83f-e69c57ecfbbe)
+(interactive, no install needed — see [Two dashboard options](#two-dashboard-options) below)
 
 ## What's here
 
@@ -16,16 +20,48 @@ star schema, a Power BI build spec, and a written business-insights report.
 | `scripts/01_clean_and_build_tables.py` | The production cleaning pipeline — reads `data/raw`, writes `data/processed` + `data/olist.duckdb` |
 | `sql/*.sql` | Business-question queries organized by theme (sales, category, delivery, regional, payments, sellers, retention) |
 | `sql/run_queries.py` | Runs every query in `/sql`, saves results to `sql/results/` |
-| `dashboard/powerbi_spec.md` | Power BI data model, relationships, DAX measures, and a page-by-page visual layout plan |
+| `dashboard/olist_web_dashboard.html` | **Live web dashboard** — standalone HTML/Chart.js, no server or install needed |
+| `scripts/build_dashboard_data.py` + `scripts/build_web_dashboard.py` | Generate the web dashboard from the SQL results |
+| `dashboard/powerbi_spec.md` | Power BI data model, relationships, DAX measures, and a page-by-page visual layout plan (for building manually in Power BI Desktop) |
+| `dashboard/powerbi_project/` | **Generated Power BI project (`.pbip`)** — full semantic model (tables, relationships, all 15 DAX measures) pre-built in code; open it in Power BI Desktop and skip straight to building visuals |
+| `scripts/build_pbip_project.py` | Generates the `.pbip` project from the processed tables |
 | `report/insights_report.md` | ~1-page written findings + recommendations |
+
+## Two dashboard options
+
+This project has **two working dashboard builds** on the same star schema —
+built to compare a code-generated web dashboard against a code-generated
+Power BI project:
+
+1. **Web dashboard** (`dashboard/olist_web_dashboard.html`) — a standalone,
+   self-contained HTML page (vanilla JS + Chart.js) with 6 sections mirroring
+   the Power BI page plan: Overview, Category Performance, Delivery &
+   Logistics, Regional, Payments & Sellers, Customer Retention. Open the file
+   directly in any browser, or view it live at the link above. No install,
+   no Power BI license needed — this is the fastest way to see (and share)
+   the analysis.
+2. **Power BI project** (`dashboard/powerbi_project/OlistDashboard.pbip`) —
+   a fully generated Power BI Desktop project: all 9 tables imported, all 9
+   relationships wired (including the 1:1 `dim_orders ↔ dim_customers` edge
+   case and the inactive `dim_sellers → dim_geolocation` relationship needed
+   to break a model cycle), and all 15 DAX measures defined. Opening the
+   `.pbip` in Power BI Desktop lands you on a blank report page with the
+   entire data model and measure list already in the Fields pane — the
+   hard part (relationships, DAX syntax) is done, so you go straight to
+   dragging fields onto visuals. **Experimental:** this was hand-authored in
+   code from the TMDL/PBIR file formats and can't be validated without Power
+   BI Desktop itself; if it needs repair on first open, fall back to
+   `dashboard/powerbi_spec.md` and build the model manually (same target
+   design, just more manual).
 
 ## Tech stack
 
 - **Python** (pandas, matplotlib, seaborn) — cleaning + EDA
 - **SQL via DuckDB** — the core analytical querying layer, run directly
   against the star-schema Parquet/CSV tables
-- **Power BI Desktop** — final dashboard (built manually from the spec in
-  `/dashboard`, not included in this repo)
+- **Chart.js** — the live web dashboard's charting library
+- **Power BI Desktop** — the generated `.pbip` project, or build manually
+  from `dashboard/powerbi_spec.md`
 
 ## The data model
 
@@ -37,8 +73,8 @@ A star schema built from the 9 raw tables (full rationale in the notebook):
   facts key off via `order_id`), `dim_customers`, `dim_sellers`,
   `dim_products`, `dim_date`, `dim_geolocation`
 
-This is what makes Power BI import trivial — no need to re-join across all 9
-raw files inside Power BI itself.
+This is what makes both dashboards trivial to build — no need to re-join
+across all 9 raw files inside Power BI (or in JS) directly.
 
 ## Setup / how to reproduce
 
@@ -59,9 +95,18 @@ raw files inside Power BI itself.
    ```
    jupyter nbconvert --to notebook --execute --inplace notebooks/01_data_cleaning_eda.ipynb
    ```
-6. Open Power BI Desktop, import from `data/processed/`, and follow
-   `dashboard/powerbi_spec.md` to build the data model, DAX measures, and
-   report pages.
+6. Build the web dashboard (writes `dashboard/olist_web_dashboard.html`):
+   ```
+   python scripts/build_dashboard_data.py
+   python scripts/build_web_dashboard.py
+   ```
+   Then just open that HTML file in a browser.
+7. Generate the Power BI project (writes `dashboard/powerbi_project/`):
+   ```
+   python scripts/build_pbip_project.py
+   ```
+   Then open `dashboard/powerbi_project/OlistDashboard.pbip` in Power BI
+   Desktop — or build it manually following `dashboard/powerbi_spec.md`.
 
 ## Key findings (full detail in `report/insights_report.md`)
 
@@ -91,3 +136,5 @@ raw files inside Power BI itself.
 - `dim_geolocation` is deduplicated from ~1M noisy raw pings down to one
   averaged lat/lng per zip-code prefix, with a handful of out-of-Brazil
   coordinates dropped as bad geocodes.
+- The generated `.pbip` project (`dashboard/powerbi_project/`) is
+  experimental — see the note in [Two dashboard options](#two-dashboard-options).

@@ -1,0 +1,54 @@
+table fact_payments
+	lineageTag: 11febd79-4ca8-4627-afb9-0659ce3a4eee
+
+	column order_id
+		dataType: string
+		lineageTag: c45ecbf6-bf3a-4d10-a812-3a589d562508
+		summarizeBy: none
+		sourceColumn: order_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column payment_sequential
+		dataType: int64
+		lineageTag: 18c686ad-18f6-4fcd-bafe-4b02b93bce70
+		summarizeBy: none
+		sourceColumn: payment_sequential
+
+		annotation SummarizationSetBy = Automatic
+
+	column payment_type
+		dataType: string
+		lineageTag: e04af19d-0a1a-4fb0-bd65-37e48b638525
+		summarizeBy: none
+		sourceColumn: payment_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column installments
+		dataType: int64
+		lineageTag: 286a211c-56a8-4bb2-9661-aba249b63434
+		summarizeBy: sum
+		sourceColumn: installments
+
+		annotation SummarizationSetBy = Automatic
+
+	column payment_value
+		dataType: double
+		lineageTag: bdbeb6e7-4dc4-4ec7-b60b-4f0f674365c0
+		summarizeBy: sum
+		sourceColumn: payment_value
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_payments = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("E:\Studies\projects\analyst_project\data\processed\fact_payments.csv"),[Delimiter=",", Columns=5, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"order_id", type text}, {"payment_sequential", Int64.Type}, {"payment_type", type text}, {"installments", Int64.Type}, {"payment_value", type number}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
